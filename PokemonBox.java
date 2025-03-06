@@ -8,10 +8,11 @@ public class PokemonBox {
 	private int numCaught;
 
 	// CONSTRUCTORS
-	public PokemonBox(Pokemon[] caught) {
-		if(caught == null || caught.length == 0) {
-			System.out.println("ERROR: Invalid Pokemon array provided to PokemonBox. Exiting program.");
-			System.exit(0);
+	public PokemonBox(Pokemon[] caught) throws IllegalArgumentException
+	{
+		if (caught == null || caught.length == 0) 
+		{
+			throw new IllegalArgumentException("ERROR: Invalid Pokemon array provided to PokemonBox. Exiting program.");
 		}
 		this.numCaught = caught.length;
 		this.caught = this.deepCopyArray(caught, this.numCaught*2);
@@ -39,8 +40,17 @@ public class PokemonBox {
 		return location;
 	}
 
-	public Pokemon getPokemon(int location) {
-		return this.caught[location];
+	public Pokemon getPokemon(int location) throws IndexOutOfBoundsException
+	{
+		if (location < 0 || location >= this.numCaught)
+		{
+			throw new IndexOutOfBoundsException(
+					"ERROR: Location provided is less than 0 or greater than or equal to unique Pokemon in box");
+		}
+		else 
+		{
+			return this.caught[location];
+		}
 	}
 
 	public int getNumCaught() {
@@ -51,23 +61,43 @@ public class PokemonBox {
 		return this.numCaught == 0;
 	}
 
-	public boolean hasPokemon(String pokemonName) {
+	public boolean hasPokemon(String pokemonName) 
+	{
 		return this.getLocation(pokemonName) != -1;
 	}
 
 	// MUTATOR/SETTER METHODS
-	public void add(Pokemon newPoke) {
-		//new pokemon,  add to partially filled array
-		//but first check if box is full
-		if(this.numCaught == this.caught.length) {
-			//if full, then grow array *2 and copy contents over
-			this.caught = this.deepCopyArray(this.caught, this.numCaught*2);
+	public void add(Pokemon newPoke) throws PokemonAlreadyExistsException
+	{
+		if (this.hasPokemon(newPoke.getName()))
+		{
+			throw new PokemonAlreadyExistsException("Our regions sustainability efforts in reducing habitat loss and environmental impacts requires a max of 1 of the same type of Pokémon in the Box.", newPoke);
 		}
+		else
+		{
+			//new pokemon,  add to partially filled array
+			//but first check if box is full
+			if (this.numCaught == this.caught.length) 
+			{
+				//if full, then grow array *2 and copy contents over
+				this.caught = this.deepCopyArray(this.caught, this.numCaught*2);
+			}
 
-		//then add new caught pokemon
-		this.caught[this.numCaught] = new Pokemon(newPoke);
-		this.numCaught++;
+			//then add new caught 
+			try
+			{
+				this.caught[this.numCaught] = new Pokemon(newPoke);
+				this.numCaught++;
+			}
+			catch(IllegalArgumentException iae)
+			{
+				System.out.println("ERROR: You're copying a null Pokemon in PokemonBox");
+				System.exit(0);
+			}
+		}
+		
 	}
+	
 	
 	// OTHER REQUIRED METHODS
 	public String toString() {
